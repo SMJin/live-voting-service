@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>실시간 투표 시스템</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 2rem; }
+        button { margin: 0.3rem; padding: 0.5rem 1rem; }
+        .vote-result { margin-top: 2rem; }
+    </style>
+</head>
+<body>
+<h1>실시간 투표</h1>
+
+<label>이름: <input type="text" id="username" placeholder="닉네임 입력"></label><br><br>
+
+<p>원하는 항목을 선택하세요:</p>
+<button onclick="sendVote('Java')">Java</button>
+<button onclick="sendVote('Python')">Python</button>
+<button onclick="sendVote('JavaScript')">JavaScript</button>
+<button onclick="resetVote()">투표 초기화</button>
+
+<div class="vote-result">
+    <h3>실시간 결과:</h3>
+    <pre id="result"></pre>
+</div>
+
+<script>
+    let stompClient = null;
+
+    function connect() {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/result', function (message) {
+                const voteResult = JSON.parse(message.body);
+                if (voteResult.type === 'RESULT') {
+                    const map = JSON.parse(voteResult.option);
+                    const display = Object.entries(map)
+                        .map(([k, v]) => `${k}: ${v}표`).join('\n');
+                    document.getElementById('result').textContent = display;
+                } else if (voteResult.type === 'ERROR') {
+                    alert(voteResult.option); // 에러 메시지 표시
+                }
+            });
+        });
+    }
+
+    function sendVote(option) {
+        const user = document.getElementById("username").value;
+        if (!user) {
+            alert("이름을 입력해주세요!");
+            return;
+        }
+        stompClient.send("/app/vote", {}, JSON.stringify({
+            type: "VOTE",
+            user: user,
+            option: option
+        }));
+    }
+
+    function resetVote() {
+        stompClient.send("/app/vote", {}, JSON.stringify({
+            type: "RESET"
+        }));
+    }
+
+    connect();
+</script>
+
+</body>
+</html>
