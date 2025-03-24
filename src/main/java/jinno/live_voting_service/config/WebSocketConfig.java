@@ -20,8 +20,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // 구독 경로: 클라이언트가 메시지를 수신받을 경로 prefix
-        registry.enableSimpleBroker("/topic"); // → 클라이언트는 /topic/result 를 구독하게 됨
+//        // 구독 경로: 클라이언트가 메시지를 수신받을 경로 prefix
+//        // 그러나 redis 를 도입한다면, RedisSubscriber + SimpMessagingTemplate 사용
+//        registry.enableSimpleBroker("/topic"); // → 클라이언트는 /topic/result 를 구독하게 됨
 
         // 발행 경로: 클라이언트가 메시지를 보낼 경로 prefix
         registry.setApplicationDestinationPrefixes("/app"); // → 클라이언트는 /app/vote 로 전송함
