@@ -3,6 +3,7 @@ package jinno.live_voting_service.redis;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component
-public class RedisSubscriber {
+public class RedisSubscriber implements MessageListener {
 
     private final SimpMessagingTemplate messagingTemplate;
 
